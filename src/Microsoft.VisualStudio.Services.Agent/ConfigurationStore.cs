@@ -50,19 +50,15 @@ namespace Microsoft.VisualStudio.Services.Agent
             // This setter is for backwards compatibility with the top level fingerprint setting
             set
             {
-                if (value == null) return;
-
-                var settings = SignatureVerification ?? new SignatureVerificationSettings();
-
-                if (settings.Fingerprints == null)
+                // prefer the new config format to the old
+                if (SignatureVerification == null && value != null)
                 {
-                    settings.Fingerprints = new List<string>();
+                    SignatureVerification = new SignatureVerificationSettings()
+                    {
+                        Mode = SignatureVerificationMode.Error,
+                        Fingerprints = new List<string>() { value }
+                    };
                 }
-
-                settings.Fingerprints.Add(value);
-                settings.Mode = SignatureVerificationMode.Error;
-
-                SignatureVerification = settings;
             }
         }
 
