@@ -194,13 +194,16 @@ namespace Microsoft.VisualStudio.Services.Agent.Tests.L1.Worker
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
         [Trait("Level", "L1")]
         [Trait("Category", "Worker")]
         // TODO: When NuGet works cross-platform, remove these traits. Also, package NuGet with the Agent.
         [Trait("SkipOn", "darwin")]
         [Trait("SkipOn", "linux")]
-        public async Task SignatureVerification_PassesWhenAllTasksAreSigned()
+        public async Task SignatureVerification_PassesWhenAllTasksAreSigned(bool useFingerprintList, bool useTopLevelFingerprint)
         {
             try
             {
@@ -210,9 +213,16 @@ namespace Microsoft.VisualStudio.Services.Agent.Tests.L1.Worker
                 AgentSettings settings = fakeConfigurationStore.GetSettings();
                 settings.SignatureVerification = new SignatureVerificationSettings()
                 {
-                    Mode = SignatureVerificationMode.Error,
-                    Fingerprints = new List<string>() { _fingerprint }
+                    Mode = SignatureVerificationMode.Error
                 };
+                if (useFingerprintList)
+                {
+                    settings.SignatureVerification.Fingerprints = new List<string>() { _fingerprint };
+                }
+                else if (useTopLevelFingerprint)
+                {
+                    settings.Fingerprint = _fingerprint;
+                }
                 fakeConfigurationStore.UpdateSettings(settings);
 
                 var message = LoadTemplateMessage();
@@ -233,13 +243,16 @@ namespace Microsoft.VisualStudio.Services.Agent.Tests.L1.Worker
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(false, false)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
         [Trait("Level", "L1")]
         [Trait("Category", "Worker")]
         // TODO: When NuGet works cross-platform, remove these traits. Also, package NuGet with the Agent.
         [Trait("SkipOn", "darwin")]
         [Trait("SkipOn", "linux")]
-        public async Task SignatureVerification_FailsWhenTasksArentSigned()
+        public async Task SignatureVerification_FailsWhenTasksArentSigned(bool useFingerprintList, bool useTopLevelFingerprint)
         {
             try
             {
@@ -251,37 +264,14 @@ namespace Microsoft.VisualStudio.Services.Agent.Tests.L1.Worker
                 {
                     Mode = SignatureVerificationMode.Error
                 };
-                fakeConfigurationStore.UpdateSettings(settings);
-                var message = LoadTemplateMessage();
-
-                // Act
-                var results = await RunWorker(message);
-
-                // Assert
-                AssertJobCompleted();
-                Assert.Equal(TaskResult.Failed, results.Result);
-            }
-            finally
-            {
-                TearDown();
-            }
-        }
-
-        [Fact]
-        [Trait("Level", "L1")]
-        [Trait("Category", "Worker")]
-        // TODO: When NuGet works cross-platform, remove these traits. Also, package NuGet with the Agent.
-        [Trait("SkipOn", "darwin")]
-        [Trait("SkipOn", "linux")]
-        public async Task SignatureVerification_FailsWhenTasksArentSignedWithFingerprint()
-        {
-            try
-            {
-                // Arrange
-                SetupL1();
-                FakeConfigurationStore fakeConfigurationStore = GetMockedService<FakeConfigurationStore>();
-                AgentSettings settings = fakeConfigurationStore.GetSettings();
-                settings.Fingerprint = _fingerprint; // test backwards compatibility with older, top level fingerprint configuration setting
+                if (useFingerprintList)
+                {
+                    settings.SignatureVerification.Fingerprints = new List<string>() { _fingerprint };
+                }
+                else if (useTopLevelFingerprint)
+                {
+                    settings.Fingerprint = _fingerprint;
+                }
                 fakeConfigurationStore.UpdateSettings(settings);
                 var message = LoadTemplateMessage();
 
