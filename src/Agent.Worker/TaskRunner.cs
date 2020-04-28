@@ -84,7 +84,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Worker
                     verificationMode = settings.SignatureVerification.Mode;
                 }
 
-                if(verificationMode != SignatureVerificationMode.None)
+                if (verificationMode != SignatureVerificationMode.None)
                 {
                     ISignatureService signatureService = HostContext.CreateService<ISignatureService>();
                     Boolean verificationSuccessful =  await signatureService.VerifyAsync(definition, ExecutionContext.CancellationToken);
