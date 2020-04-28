@@ -349,7 +349,7 @@ namespace Microsoft.VisualStudio.Services.Agent.Tests.L1.Worker
                 AgentSettings settings = fakeConfigurationStore.GetSettings();
                 settings.SignatureVerification = new SignatureVerificationSettings()
                 {
-                    Mode = SignatureVerificationMode.Warn,
+                    Mode = SignatureVerificationMode.Warning,
                     Fingerprints = new List<string>() { "BAD" }
                 };
                 fakeConfigurationStore.UpdateSettings(settings);

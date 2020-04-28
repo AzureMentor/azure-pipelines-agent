@@ -13,7 +13,7 @@ namespace Microsoft.VisualStudio.Services.Agent
     public enum SignatureVerificationMode
     {
         Error,
-        Warn,
+        Warning,
         None
     }
 
